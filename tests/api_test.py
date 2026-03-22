@@ -5,36 +5,40 @@ import subprocess
 import pytest
 import requests
 
-BASE = "http://localhost:3000"
+BASE = os.getenv("API_BASE", "http://localhost:3000")
 
-@pytest.fixture(scope="session", autouse=True)
-def server():
-    """Start the API server from start-server.bat before tests and stop it after."""
-    repo_root = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
-    server_script = os.path.join(repo_root, "start-server.bat")
+# Moved to option A: assume the API service is started in docker-compose.
+# The Windows batch-based server startup fixture is preserved below as comments
+# for local dev traceability.
 
-    proc = subprocess.Popen(["cmd", "/c", server_script], cwd=repo_root)
-
-    # wait for the server to be available
-    for _ in range(30):
-        try:
-            r = requests.get(f"{BASE}/hello", timeout=1)
-            if r.status_code == 200:
-                break
-        except requests.RequestException:
-            time.sleep(1)
-    else:
-        proc.terminate()
-        proc.wait(timeout=5)
-        raise RuntimeError("Server did not start in time")
-
-    yield
-
-    proc.terminate()
-    try:
-        proc.wait(timeout=5)
-    except subprocess.TimeoutExpired:
-        proc.kill()
+# @pytest.fixture(scope="session", autouse=True)
+# def server():
+#     """Start the API server from start-server.bat before tests and stop it after."""
+#     repo_root = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+#     server_script = os.path.join(repo_root, "start-server.bat")
+#
+#     proc = subprocess.Popen(["cmd", "/c", server_script], cwd=repo_root)
+#
+#     # wait for the server to be available
+#     for _ in range(30):
+#         try:
+#             r = requests.get(f"{BASE}/hello", timeout=1)
+#             if r.status_code == 200:
+#                 break
+#         except requests.RequestException:
+#             time.sleep(1)
+#     else:
+#         proc.terminate()
+#         proc.wait(timeout=5)
+#         raise RuntimeError("Server did not start in time")
+#
+#     yield
+#
+#     proc.terminate()
+#     try:
+#         proc.wait(timeout=5)
+#     except subprocess.TimeoutExpired:
+#         proc.kill()
 
 @pytest.fixture
 def api_base():
