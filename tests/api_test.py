@@ -74,14 +74,18 @@ def test_put_hello_status(client, api_base):
     r = client.put(f"{api_base}/hello", json={"message": "Test PUT"})
     assert r.status_code == 200
 
-def test_put_hello_updates_message(client, api_base):
-    msg = "Updated via test"
-    r = client.put(f"{api_base}/hello", json={"message": msg})
-    assert r.json()["updated"] == msg
+@pytest.mark.parametrize("new_message", [
+    "Updated via test",
+    "Parallel hello",
+    "Hello from worker 2",
+    "Another independent update",
+])
+def test_put_hello_updates_message(client, api_base, new_message):
+    r = client.put(f"{api_base}/hello", json={"message": new_message})
+    assert r.status_code == 200
+    assert r.json()["updated"] == new_message
 
 def test_put_missing_message(client, api_base):
     r = client.put(f"{api_base}/hello", json={})
-    # This SHOULD be 400, but your API returns 200.
-    # Update your API to fix this.
     assert r.status_code == 400
 

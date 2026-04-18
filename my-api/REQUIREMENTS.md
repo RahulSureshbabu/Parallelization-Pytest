@@ -30,4 +30,4 @@
 | PUT-4 | The response MUST be a JSON object. |
 | PUT-5 | The response MUST contain the field "updated". |
 | PUT-6 | The value of "updated" MUST equal the "message" sent in the request. |
-| PUT-7 | If no "message" field is provided, return 400 Bad Request (this is not implemented, but SHOULD be). |
+| PUT-7 | If no "message" field is provided, return 400 Bad Request. |

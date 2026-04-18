@@ -34,6 +34,7 @@ What you get:
 
 - `my-api/` → Express API code
 - `tests/` → Pytest API tests
+- `ui-playwright-tests/` → Playwright UI automation project
 - `docker-compose.yml` → Runs API + test container together
 - `run-tests.sh` → Installs tools in the test container, runs tests, builds Allure report
 - `requirements.txt` → Python test dependencies
@@ -167,6 +168,34 @@ export API_BASE="http://localhost:3000"
 pytest
 ```
 
+> `pytest.ini` is configured to add `-n auto` by default, so `pytest` will execute using parallel workers automatically.
+
+### What `pytest -n auto` means
+
+- `pytest-xdist` is installed in `requirements.txt`
+- `-n auto` automatically creates one worker process per CPU core
+- tests are distributed to worker processes to run concurrently
+- this can dramatically reduce runtime for multi-test suites
+
+### Why this is a good fit for this repo
+
+- the API tests are stateless: each test sends independent HTTP requests
+- there is no shared in-memory test state between workers
+- the API itself is external to the test runner, so concurrent requests are safe
+- the parameterized PUT test demonstrates multiple update requests that can run in parallel
+
+### When parallel tests are not a good idea
+
+- when tests mutate shared global state without isolation
+- when tests use the same file, database row, or port without locking
+- when setup/teardown is not thread-safe or process-safe
+
+If your tests become flaky in parallel, use one of these instead:
+
+```bash
+pytest -n 1
+```
+
 ### Optional: generate local Allure raw results
 
 ```bash
@@ -291,9 +320,3 @@ Current suite has 7 tests total.
 	- Test expectation: should return `400` for missing `message`.
 
 ---
-
-## 12) Next Improvements (Optional)
-
-- Add GitHub Actions workflow steps to publish Allure artifacts
-- Add Makefile or task shortcuts for one-command local runs
-- Add API negative test cases and schema validation tests

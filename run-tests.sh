@@ -28,8 +28,8 @@ echo "Setting PATH..."
 export PATH=$PATH:/app/allure-2.24.0/bin
 echo "PATH set: $PATH"
 
-echo "Running pytest..."
-pytest --alluredir=allure-results
+echo "Running pytest in parallel..."
+pytest -n auto --alluredir=allure-results
 echo "Pytest completed."
 
 echo "Generating Allure report..."
